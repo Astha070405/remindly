@@ -2,15 +2,21 @@ package com.notesapp.notes_app.security.filter;
 
 import com.notesapp.notes_app.security.jwt.JwtService;
 import com.notesapp.notes_app.security.service.CustomUserDetailsService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,10 +34,29 @@ public class JwtAuthenticationFilter
 
     @Override
     protected void doFilterInternal(
+
             HttpServletRequest request,
+
             HttpServletResponse response,
+
             FilterChain filterChain
+
     ) throws ServletException, IOException {
+
+        String path =
+                request.getServletPath();
+
+        if (
+                path.startsWith("/api/auth")
+        ) {
+
+            filterChain.doFilter(
+                    request,
+                    response
+            );
+
+            return;
+        }
 
         final String authHeader =
                 request.getHeader("Authorization");
@@ -46,7 +71,10 @@ public class JwtAuthenticationFilter
                         !authHeader.startsWith("Bearer ")
         ) {
 
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(
+                    request,
+                    response
+            );
 
             return;
         }
@@ -60,7 +88,10 @@ public class JwtAuthenticationFilter
 
         } catch (Exception e) {
 
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(
+                    request,
+                    response
+            );
 
             return;
         }
@@ -75,26 +106,34 @@ public class JwtAuthenticationFilter
         ) {
 
             UserDetails userDetails =
+
                     userDetailsService
                             .loadUserByUsername(
                                     userEmail
                             );
 
             if (
+
                     jwtService.isTokenValid(
                             jwt,
                             userDetails.getUsername()
                     )
+
             ) {
 
                 UsernamePasswordAuthenticationToken authToken =
+
                         new UsernamePasswordAuthenticationToken(
+
                                 userDetails,
+
                                 null,
+
                                 userDetails.getAuthorities()
                         );
 
                 authToken.setDetails(
+
                         new WebAuthenticationDetailsSource()
                                 .buildDetails(request)
                 );
