@@ -15,19 +15,22 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
-    public CorsConfigurationSource
-    corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
                 List.of(
+                        "http://localhost:5173",
                         "https://remindly-notes-app-978a.vercel.app"
                 )
         );
@@ -47,9 +50,7 @@ public class SecurityConfig {
                 List.of("*")
         );
 
-        configuration.setAllowCredentials(
-                true
-        );
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
@@ -61,6 +62,7 @@ public class SecurityConfig {
 
         return source;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
@@ -68,8 +70,11 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
+
+                .cors(Customizer.withDefaults())
+
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(
                                 "/api/auth/**"
                         )
@@ -91,6 +96,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 }
